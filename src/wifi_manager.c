@@ -184,7 +184,6 @@ void wifi_manager_start(const char* ssid){
 	/* initialize flash memory */
 	nvs_flash_init();
 	ESP_ERROR_CHECK(nvs_sync_create()); /* semaphore for thread synchronization on NVS memory */
-
 	/* memory allocation */
 	wifi_manager_queue = xQueueCreate( 3, sizeof( queue_message) );
 	wifi_manager_json_mutex = xSemaphoreCreateMutex();
@@ -966,7 +965,7 @@ void wifi_manager( void * pvParameters ){
 	ESP_ERROR_CHECK(esp_wifi_start());
 
 	/* start http server */
-	http_app_start(false);
+	// http_app_start(false);
 
 	/* wifi scanner config */
 	wifi_scan_config_t scan_config = {
@@ -1247,7 +1246,7 @@ void wifi_manager( void * pvParameters ){
 
 					/* restart HTTP daemon */
 					http_app_stop();
-					http_app_start(false);
+					// http_app_start(false);
 
 					/* callback */
 					if(cb_ptr_arr[msg.code]) (*cb_ptr_arr[msg.code])(NULL);
