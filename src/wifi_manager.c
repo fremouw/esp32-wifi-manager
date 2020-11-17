@@ -371,7 +371,7 @@ bool wifi_manager_fetch_wifi_sta_config(){
 		nvs_sync_unlock();
 
 
-		ESP_LOGI(TAG, "wifi_manager_fetch_wifi_sta_config: ssid:%s password:%s",wifi_manager_config_sta->sta.ssid,wifi_manager_config_sta->sta.password);
+		ESP_LOGI(TAG, "wifi_manager_fetch_wifi_sta_config: ssid:%s password:***",wifi_manager_config_sta->sta.ssid);
 		ESP_LOGD(TAG, "wifi_manager_fetch_wifi_settings: SoftAP_ssid:%s",wifi_settings.ap_ssid);
 		ESP_LOGD(TAG, "wifi_manager_fetch_wifi_settings: SoftAP_pwd:%s",wifi_settings.ap_pwd);
 		ESP_LOGD(TAG, "wifi_manager_fetch_wifi_settings: SoftAP_channel:%i",wifi_settings.ap_channel);
