@@ -178,7 +178,7 @@ void wifi_manager_start(const char* ssid){
 	esp_log_level_set("wifi", ESP_LOG_NONE);
 
 	if(ssid != NULL) {
-		snprintf(&wifi_settings.ap_ssid, MAX_SSID_SIZE, "%s", ssid);
+		snprintf((char*)&wifi_settings.ap_ssid, MAX_SSID_SIZE, "%s", ssid);
 	}
 
 	/* initialize flash memory */
