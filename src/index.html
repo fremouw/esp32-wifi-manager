@@ -67,16 +67,41 @@
 							<div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div>
 							<p class="tctr">You may lose wifi access while the esp32 recalibrates its radio. Please wait until your device automatically reconnects. This can take up to 30s.</p>
 						</div>
-						<div id="connect-success">
-							<h3 class="gr">Success!</h3>
-						</div>
+						<!-- <div id="connect-success"></div> -->
 						<div id="connect-fail">
 							<h3 class="rd">Connection failed</h3>
 							<p class="tctr">Please double-check wifi password if any and make sure the access point has good signal.</p>
 						</div>
 					</section>
+				</div>
+				<div id="connect-done">
+					<header>
+						<h1>Device configuration</h1>
+					</header>
+					<h2>Connected to <span id="ssid-done"></span></h2>
+					<div id="connect-success">
+						<section>
+							<h4>MQTT</h4>
+							<label class="input-full">
+								<input id="config-uri" class="config"  type="text" placeholder="mqtts://mqtt.example.com" />
+							</label>
+							<label class="input">
+								<input id="config-username" class="config" type="text" placeholder="username" />
+								<input id="config-password" class="config" type="password" placeholder="password" />
+							</label>
+							<input id="config-outdoor" class="config"  type="text" placeholder="outdoor temperature topic" />
+							<input id="config-indoor" class="config"  type="text" placeholder="indoor temperature topic" />
+							<h4>NTP</h4>
+							<input id="ntp-server" class="config"  type="text" placeholder="ntp server" value="ntp0.nl.net" />
+							<input id="ntp-tz" class="config"  type="text" placeholder="timezone" value="CET-1CEST,M3.5.0,M10.5.0/3" />
+						</section>
+						<section class="configstatus">
+							<div id="configmsg" class="tctr"></div>
+						</section>
+					</div>
 					<div class="buttons">
-						<input id="ok-connect" type="button" value="OK" class="ctr" />
+						<div id="mqttmsg"></div>
+						<input id="ok-connect" type="button" value="Save" class="ctr" />
 					</div>
 				</div>
 				<div id="connect-details">

@@ -5,6 +5,7 @@ const wifi_div = gel("wifi");
 const connect_div = gel("connect");
 const connect_manual_div = gel("connect_manual");
 const connect_wait_div = gel("connect-wait");
+const connect_done_div = gel("connect-done");
 const connect_details_div = gel("connect-details");
 
 function docReady(fn) {
@@ -23,6 +24,7 @@ function docReady(fn) {
 var selectedSSID = "";
 var refreshAPInterval = null;
 var checkStatusInterval = null;
+var checkConfigStatusInterval = null;
 
 function stopCheckStatusInterval() {
   if (checkStatusInterval != null) {
@@ -40,6 +42,17 @@ function stopRefreshAPInterval() {
 
 function startCheckStatusInterval() {
   checkStatusInterval = setInterval(checkStatus, 950);
+}
+
+function startCheckConfigStatusInterval() {
+  checkConfigStatusInterval = setInterval(checkConfigStatus, 950);
+}
+
+function stopCheckConfigStatusInterval() {
+  if (checkConfigStatusInterval != null) {
+    clearInterval(checkConfigStatusInterval);
+    checkConfigStatusInterval = null;
+  }
 }
 
 function startRefreshAPInterval() {
@@ -66,7 +79,6 @@ docReady(async function () {
       connect_manual_div.style.display = "block";
       connect_div.style.display = "none";
 
-      gel("connect-success").display = "none";
       gel("connect-fail").display = "none";
     },
     false
@@ -136,8 +148,12 @@ docReady(async function () {
   gel("ok-connect").addEventListener(
     "click",
     () => {
-      connect_wait_div.style.display = "none";
-      wifi_div.style.display = "block";
+      // connect_wait_div.style.display = "none";
+      // wifi_div.style.display = "block";
+
+      performSaveConfig();
+
+      gel("configmsg").textContent = "Saving...";
     },
     false
   );
@@ -181,9 +197,21 @@ docReady(async function () {
     wifi_div.style.display = "block";
   });
 
+
+  // wifi_div.style.display = "none";
+  // connect_wait_div.display = "block";
+  // //unlock the wait screen if needed
+  // gel("ok-connect").disabled = false;
+
+  // // update wait screen
+  // gel("loading").style.display = "none";
+  // gel("connect-success").style.display = "block";
+  // gel("connect-wait").style.display = "block";
+  // gel("connect-fail").style.display = "none";
+
   //first time the page loads: attempt get the connection status and start the wifi scan
   await refreshAP();
-  startCheckStatusInterval();
+  // startCheckStatusInterval();
   startRefreshAPInterval();
 });
 
@@ -206,11 +234,11 @@ async function performConnect(conntype) {
   }
   //reset connection
   gel("loading").style.display = "block";
-  gel("connect-success").style.display = "none";
   gel("connect-fail").style.display = "none";
 
-  gel("ok-connect").disabled = true;
+  // gel("ok-connect").disabled = true;
   gel("ssid-wait").textContent = selectedSSID;
+  gel("ssid-done").textContent = selectedSSID;
   connect_div.style.display = "none";
   connect_manual_div.style.display = "none";
   connect_wait_div.style.display = "block";
@@ -227,7 +255,33 @@ async function performConnect(conntype) {
 
   //now we can re-set the intervals regardless of result
   startCheckStatusInterval();
-  startRefreshAPInterval();
+}
+
+async function performSaveConfig() {
+  var settings = {
+    mqtt: {
+      uri: gel("config-uri").value,
+      username: gel("config-username").value,
+      password: gel("config-password").value,
+      outdoorTopic: gel("config-outdoor").value,
+      indoorTopic: gel("config-indoor").value,
+    },
+    ntp: {
+      server: gel("ntp-server").value,
+      timezone: gel("ntp-tz").value,
+    }
+  };
+
+  stopCheckConfigStatusInterval();
+  startCheckConfigStatusInterval();
+
+  await fetch("/settings/save", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(settings),
+  });
 }
 
 function rssiToIcon(rssi) {
@@ -272,12 +326,40 @@ function refreshAPHTML(data) {
   gel("wifi-list").innerHTML = h;
 }
 
+async function checkConfigStatus(url = "settings/status") {
+  try {
+    var response = await fetch(url);
+    var data = await response.json();
+    
+    if (data && data.hasOwnProperty("status") && data["status"] != "") {
+      console.info("status = " + data["status"]);
+
+      if(data["status"] === "connected") {
+        console.info("Works!!1");
+        gel("configmsg").textContent = "Success!";
+        stopCheckConfigStatusInterval();
+      } else if(data["status"] !== "busy") {
+        gel("configmsg").textContent = "Error: unable to connect to MQTT broker.";
+        stopCheckConfigStatusInterval();  
+      }
+    } else {
+      gel("configmsg").textContent = "Error: invalid JSON.";
+      stopCheckConfigStatusInterval(); 
+    }
+  } catch (e) {
+    gel("configmsg").textContent = "Error fetching MQTT status.";
+    console.info("Was not able to fetch mqtt/status");
+    stopCheckConfigStatusInterval();  
+  }
+}
+
 async function checkStatus(url = "status.json") {
   try {
     var response = await fetch(url);
     var data = await response.json();
     if (data && data.hasOwnProperty("ssid") && data["ssid"] != "") {
       if (data["ssid"] === selectedSSID) {
+        stopCheckStatusInterval();
         // Attempting connection
         switch (data["urc"]) {
           case 0:
@@ -293,12 +375,14 @@ async function checkStatus(url = "status.json") {
             gel("wifi-status").style.display = "block";
 
             //unlock the wait screen if needed
-            gel("ok-connect").disabled = false;
+            // gel("ok-connect").disabled = false;
 
             //update wait screen
             gel("loading").style.display = "none";
-            gel("connect-success").style.display = "block";
-            gel("connect-fail").style.display = "none";
+            // gel("connect-success").style.display = "none";
+            // gel("connect-fail").style.display = "none";
+            gel("connect-wait").style.display = "none";
+            gel("connect-done").style.display = "block";
             break;
           case 1:
             console.info("Connection attempt failed!");
@@ -315,12 +399,12 @@ async function checkStatus(url = "status.json") {
             gel("wifi-status").display = "none";
 
             //unlock the wait screen
-            gel("ok-connect").disabled = false;
+            // gel("ok-connect").disabled = false;
 
             //update wait screen
             gel("loading").display = "none";
             gel("connect-fail").style.display = "block";
-            gel("connect-success").style.display = "none";
+            // gel("connect-success").style.display = "none";
             break;
         }
       } else if (data.hasOwnProperty("urc") && data["urc"] === 0) {

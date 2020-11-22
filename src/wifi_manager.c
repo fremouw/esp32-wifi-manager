@@ -786,7 +786,7 @@ void wifi_manager( void * pvParameters ){
 	ESP_ERROR_CHECK(esp_wifi_start());
 
 	/* start http server */
-	// http_app_start(false);
+	http_app_start(false);
 
 	/* wifi scanner config */
 	wifi_scan_config_t scan_config = {
@@ -1119,12 +1119,12 @@ void wifi_manager( void * pvParameters ){
 					TickType_t t = pdMS_TO_TICKS( WIFI_MANAGER_SHUTDOWN_AP_TIMER );
 
 					/* if for whatever reason user configured the shutdown timer to be less than 1 tick, the AP is stopped straight away */
-					if(t > 0){
-						xTimerStart( wifi_manager_shutdown_ap_timer, (TickType_t)0 );
-					}
-					else{
-						wifi_manager_send_message(WM_ORDER_STOP_AP, (void*)NULL);
-					}
+					// if(t > 0){
+					// 	xTimerStart( wifi_manager_shutdown_ap_timer, (TickType_t)0 );
+					// }
+					// else{
+					// 	wifi_manager_send_message(WM_ORDER_STOP_AP, (void*)NULL);
+					// }
 
 				}
 
