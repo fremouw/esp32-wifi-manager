@@ -169,13 +169,17 @@ void wifi_manager_disconnect_async(){
 	wifi_manager_send_message(WM_ORDER_DISCONNECT_STA, NULL);
 }
 
-void wifi_manager_start(const char* ssid){
+void wifi_manager_start(const char* ssid, const char* password){
 
 	/* disable the default wifi logging */
 	esp_log_level_set("wifi", ESP_LOG_NONE);
 
 	if(ssid != NULL) {
 		snprintf((char*)&wifi_settings.ap_ssid, MAX_SSID_SIZE, "%s", ssid);
+	}
+
+	if(password != NULL) {
+		snprintf((char*)&wifi_settings.ap_pwd, MAX_SSID_SIZE, "%s", password);
 	}
 
 	/* initialize flash memory */

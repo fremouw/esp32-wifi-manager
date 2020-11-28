@@ -280,7 +280,7 @@ esp_netif_t* wifi_manager_get_esp_netif_ap();
 /**
  * Allocate heap memory for the wifi manager and start the wifi_manager RTOS task
  */
-void wifi_manager_start(const char* ssid);
+void wifi_manager_start(const char* ssid, const char* password);
 
 /**
  * Frees up all memory allocated by the wifi_manager and kill the task.
