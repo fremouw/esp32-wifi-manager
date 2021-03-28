@@ -127,7 +127,7 @@ const int WIFI_MANAGER_REQUEST_STA_CONNECT_BIT = BIT3;
 const int WIFI_MANAGER_STA_DISCONNECT_BIT = BIT4;
 
 /* @brief When set, means the wifi manager attempts to restore a previously saved connection at startup. */
-const int WIFI_MANAGER_REQUEST_RESTORE_STA_BIT = BIT5;
+// const int WIFI_MANAGER_REQUEST_RESTORE_STA_BIT = BIT5;
 
 /* @brief When set, means a client requested to disconnect from currently connected AP. */
 const int WIFI_MANAGER_REQUEST_WIFI_DISCONNECT_BIT = BIT6;
@@ -136,7 +136,7 @@ const int WIFI_MANAGER_REQUEST_WIFI_DISCONNECT_BIT = BIT6;
 const int WIFI_MANAGER_SCAN_BIT = BIT7;
 
 /* @brief When set, means user requested for a disconnect */
-const int WIFI_MANAGER_REQUEST_DISCONNECT_BIT = BIT8;
+// const int WIFI_MANAGER_REQUEST_DISCONNECT_BIT = BIT8;
 
 
 
@@ -880,12 +880,12 @@ void wifi_manager( void * pvParameters ){
 				 * Param in that case is a boolean indicating if the request was made automatically
 				 * by the wifi_manager.
 				 * */
-				if((BaseType_t)msg.param == CONNECTION_REQUEST_USER) {
-					xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_STA_CONNECT_BIT);
-				}
-				else if((BaseType_t)msg.param == CONNECTION_REQUEST_RESTORE_CONNECTION) {
-					xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_RESTORE_STA_BIT);
-				}
+				// if((BaseType_t)msg.param == CONNECTION_REQUEST_USER) {
+				// 	xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_STA_CONNECT_BIT);
+				// }
+				// else if((BaseType_t)msg.param == CONNECTION_REQUEST_RESTORE_CONNECTION) {
+				// 	xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_RESTORE_STA_BIT);
+				// }
 
 				uxBits = xEventGroupGetBits(wifi_manager_event_group);
 				if( ! (uxBits & WIFI_MANAGER_WIFI_CONNECTED_BIT) ){
@@ -978,28 +978,28 @@ void wifi_manager( void * pvParameters ){
 					}
 
 				}
-				else if (uxBits & WIFI_MANAGER_REQUEST_DISCONNECT_BIT){
-					/* user manually requested a disconnect so the lost connection is a normal event. Clear the flag and restart the AP */
-					xEventGroupClearBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_DISCONNECT_BIT);
+				// else if (uxBits & WIFI_MANAGER_REQUEST_DISCONNECT_BIT){
+				// 	/* user manually requested a disconnect so the lost connection is a normal event. Clear the flag and restart the AP */
+				// 	xEventGroupClearBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_DISCONNECT_BIT);
 
-					/* erase configuration */
-					if(wifi_manager_config_sta){
-						memset(wifi_manager_config_sta, 0x00, sizeof(wifi_config_t));
-					}
+				// 	/* erase configuration */
+				// 	if(wifi_manager_config_sta){
+				// 		memset(wifi_manager_config_sta, 0x00, sizeof(wifi_config_t));
+				// 	}
 
-					/* regenerate json status */
-					if(wifi_manager_lock_json_buffer( portMAX_DELAY )){
-						wifi_manager_generate_ip_info_json( UPDATE_USER_DISCONNECT );
-						wifi_manager_unlock_json_buffer();
-					}
+				// 	/* regenerate json status */
+				// 	if(wifi_manager_lock_json_buffer( portMAX_DELAY )){
+				// 		wifi_manager_generate_ip_info_json( UPDATE_USER_DISCONNECT );
+				// 		wifi_manager_unlock_json_buffer();
+				// 	}
 
-					/* save NVS memory */
-					ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_manager_config_sta) );
+				// 	/* save NVS memory */
+				// 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_manager_config_sta) );
 
 
-					/* start SoftAP */
-					wifi_manager_send_message(WM_ORDER_START_AP, NULL);
-				}
+				// 	/* start SoftAP */
+				// 	wifi_manager_send_message(WM_ORDER_START_AP, NULL);
+				// }
 				else{
 					/* lost connection ? */
 					if(wifi_manager_lock_json_buffer( portMAX_DELAY )){
@@ -1011,7 +1011,7 @@ void wifi_manager( void * pvParameters ){
 					xTimerStart( wifi_manager_retry_timer, (TickType_t)0 );
 
 					/* if it was a restore attempt connection, we clear the bit */
-					xEventGroupClearBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_RESTORE_STA_BIT);
+					// xEventGroupClearBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_RESTORE_STA_BIT);
 
 					/* if the AP is not started, we check if we have reached the threshold of failed attempt to start it */
 					if(! (uxBits & WIFI_MANAGER_AP_STARTED_BIT) ){
@@ -1093,13 +1093,13 @@ void wifi_manager( void * pvParameters ){
 				wifi_manager_safe_update_sta_ip_string(ip_event_got_ip->ip_info.ip.addr);
 
 				/* save wifi config in NVS if it wasn't a restored of a connection */
-				if(uxBits & WIFI_MANAGER_REQUEST_RESTORE_STA_BIT){
-					xEventGroupClearBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_RESTORE_STA_BIT);
-				}
-				else{
-					ESP_LOGI(TAG, "WM_EVENT_STA_GOT_IP Stored");
-					ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_manager_config_sta) );
-				}
+				// if(uxBits & WIFI_MANAGER_REQUEST_RESTORE_STA_BIT){
+				// 	xEventGroupClearBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_RESTORE_STA_BIT);
+				// }
+				// else{
+				// 	ESP_LOGI(TAG, "WM_EVENT_STA_GOT_IP Stored");
+				// 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_manager_config_sta) );
+				// }
 
 				/* reset number of retries */
 				retries = 0;
@@ -1142,7 +1142,7 @@ void wifi_manager( void * pvParameters ){
 				ESP_LOGI(TAG, "MESSAGE: ORDER_DISCONNECT_STA");
 
 				/* precise this is coming from a user request */
-				xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_DISCONNECT_BIT);
+				// xEventGroupSetBits(wifi_manager_event_group, WIFI_MANAGER_REQUEST_DISCONNECT_BIT);
 
 				/* order wifi discconect */
 				ESP_ERROR_CHECK(esp_wifi_disconnect());
